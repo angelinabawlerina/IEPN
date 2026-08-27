@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inland Empire Voter Guide 2026</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2c5282;
+            --accent: #c53030;
+            --accent-light: #e53e3e;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+        }
+        header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: -0.025em; }
+        header p { opacity: 0.9; font-size: 0.95rem; }
+        .search-container { max-width: 600px; margin: 1.5rem auto 0; position: relative; }
+        .search-container input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+            border: none;
+            border-radius: 9999px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.95);
+            color: var(--text);
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.2s;
+        }
+        .search-container input:focus { outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,0.4), var(--shadow); }
+        .search-container svg {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        .stats-bar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+        .stats-bar span strong { color: var(--primary); font-weight: 600; }
+        main { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+        .city-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: box-shadow 0.2s, transform 0.2s;
+            border: 1px solid var(--border);
+        }
+        .city-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+        .city-header {
+            background: linear-gradient(90deg, #f8fafc 0%, #edf2f7 100%);
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+            user-select: none;
+        }
+        .city-header:hover { border-bottom-color: var(--border); }
+        .city-header.active { border-bottom-color: var(--border); }
+        .city-name { font-size: 1.125rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+        .city-rank {
+            background: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .seat-count { font-size: 0.8rem; color: var(--text-light); font-weight: 500; }
+        .toggle-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: var(--text-light);
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            margin-left: 0.5rem;
+        }
+        .toggle-icon.rotated { transform: rotate(180deg); }
+        .city-body { display: none; padding: 0; }
+        .city-body.open { display: block; animation: slideDown 0.25s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .seat-section { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+        .seat-section:last-child { border-bottom: none; }
+        .seat-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .seat-title .vote-note {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+            background: var(--accent);
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .candidates-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .candidate-tag {
+            background: #edf2f7;
+            color: var(--text);
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            transition: all 0.15s;
+        }
+        .candidate-tag:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .no-results { text-align: center; padding: 3rem 1rem; color: var(--text-light); }
+        .no-results svg { width: 3rem; height: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+        .no-results h3 { font-size: 1.125rem; color: var(--text); margin-bottom: 0.25rem; }
+        footer { text-align: center; padding: 2rem 1rem; color: var(--text-light); font-size: 0.8rem; border-top: 1px solid var(--border); background: white; }
+        @media (max-width: 640px) {
+            header h1 { font-size: 1.375rem; }
+            .city-name { font-size: 1rem; }
+            .candidate-tag { font-size: 0.85rem; }
+            .stats-bar { gap: 1rem; }
+        }
+        .highlight { background: #fef3c7; padding: 0 2px; border-radius: 2px; }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <header>
+        <h1>Inland Empire Voter Guide</h1>
+        <p>2026 Local Elections &mdash; Find your city and see who&apos;s running</p>
+        <div class="search-container">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search by city name..." autocomplete="off">
+        </div>
+    </header>
+    <div class="stats-bar">
+        <span><strong id="cityCount">52</strong> Cities</span>
+        <span><strong id="seatCount">0</strong> Seats</span>
+        <span><strong id="candidateCount">0</strong> Candidates</span>
+    </div>
+    <main id="cityList"></main>
+    <div class="no-results" id="noResults" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3>No cities found</h3>
+        <p>Try a different search term</p>
+    </div>
+    <footer>
+        <p>Data compiled from election filings. Last updated August 2026.</p>
+        <p style="margin-top: 0.25rem; opacity: 0.7;">Contact your local city clerk for official ballot information.</p>
+    </footer>
+    <script>
+const electionData = [
+  {
+    "rank": 1,
+    "name": "Fontana",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Jackie Heredia",
+          "Acquanetta Warren",
+          "Sal Casillas",
+          "Mylinda Carrillo",
+          "Nicholas Ortega",
+          "Jocelyn \"Joz\" Sida",
+          "Lourdes Goni Garcia"
+        ]
+      },
+      {
+        "title": "District 1",
+        "candidates": [
+          "Philip Cothran",
+          "Nubia Diaz"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Luz Perez",
+          "John B. Roberts",
+          "Ben Vasquez"
+        ]
+      },
+      {
+        "title": "Clerk",
+        "candidates": [
+          "Germaine Key",
+          "Joe Alvanez",
+          "Daniel Quiroga"
+        ]
+      },
+      {
+        "title": "Treasurer",
+        "candidates": [
+          "Joe Armendarez",
+          "Kama Namou"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 2,
+    "name": "Riverside",
+    "seats": [
+      {
+        "title": "Ward 2",
+        "candidates": [
+          "Gracie Torres",
+          "Aram Ayra"
+        ]
+      },
+      {
+        "title": "Ward 4",
+        "candidates": [
+          "Chuck Conder",
+          "Rich Vandenberg"
+        ]
+      },
+      {
+        "title": "Ward 5",
+        "candidates": [
+          "Luis Hernandez"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 3,
+    "name": "Rancho Cucamonga",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Marjorie Hamada",
+          "Oliver King",
+          "Lynne B Kennedy",
+          "Michael R Perez",
+          "Jaskirat Sondh"
+        ]
+      },
+      {
+        "title": "District 2",
+        "candidates": [
+          "David VanGorden",
+          "DeJonae Shaw",
+          "Kristine Scott",
+          "Connie Velazquez"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Stacy Henry"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 4,
+    "name": "Ontario",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Nicolo Lalama",
+          "Kevin Kizzee",
+          "Paul Leon",
+          "Daisy Macias"
+        ]
+      },
+      {
+        "title": "District 2",
+        "candidates": [
+          "Ruben Valencia",
+          "Stephanie Martinez"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "D'Andre Lampkin",
+          "Michael Rios",
+          "Lary Trinidad",
+          "Alan Wapner"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 5,
+    "name": "Moreno Valley",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Jamie Hurtado",
+          "Ulises Cabrera",
+          "Rylee Joseph Peak",
+          "Christopher Baca",
+          "Dr Patsy Brown",
+          "Vanessa Moore"
+        ]
+      },
+      {
+        "title": "District 2",
+        "candidates": [
+          "David Zeitz",
+          "Liza Arellano",
+          "JoAnn Martinez Stephan"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Nikita Wilson",
+          "Cheylynda Barnard",
+          "Steven Granda Alvarado"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 6,
+    "name": "Victorville",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Ken Lutz",
+          "Corrine Mora",
+          "Rafael Angel Porras"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Derek Marshall",
+          "Kassandra Shamsrouf",
+          "Bob Harriman"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 7,
+    "name": "Claremont",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Ed Reece"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Jennifer Stark",
+          "Sonja Stump"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Aundre Johnson",
+          "Anna Jacobsen",
+          "Lawrence Mueller"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 8,
+    "name": "Rialto",
+    "seats": [
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "Edward Montoya Jr",
+          "Ana Gonzalez",
+          "Robert \"Bobby\" Bustamante",
+          "Ed Scott",
+          "Carl Mayfield",
+          "Edward J Carrillo",
+          "Blanca Mondragon",
+          "Celina Diaz",
+          "Rafael Trujillo"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 9,
+    "name": "Jurupa Valley",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Armando Carmona",
+          "Jose Luis Godinez"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Edgar Castelan",
+          "Elias Ascencio",
+          "Brian Scott Berkson",
+          "Christobal \"Chris\" Rosales"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "George Ruiz",
+          "Adair Gonzalez",
+          "Adriana Gonzalez"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 10,
+    "name": "Corona",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Jacque Casillas",
+          "Mary Limon",
+          "Joe Morgan"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Karen Alexander",
+          "Anissa Zamaro"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "Wes Speake",
+          "Robert Mirshafiee",
+          "Rory Connell"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 11,
+    "name": "San Bernardino",
+    "seats": [
+      {
+        "title": "Ward 1",
+        "candidates": [
+          "Virginia Marquez",
+          "Ron Alvarado"
+        ]
+      },
+      {
+        "title": "Ward 2",
+        "candidates": [
+          "Christian Shaughnessy",
+          "Benito Barrios"
+        ]
+      },
+      {
+        "title": "Ward 4",
+        "candidates": [
+          "Fred Shorett",
+          "Joe Salas"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 12,
+    "name": "Hesperia",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Jessica Navarro",
+          "Allison Lee",
+          "David Bashar Ellis"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Cameron Gregg",
+          "Jacqueline Maheata \"Chaplian\" Tahauri",
+          "Nando Monarrez"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Erin Baum",
+          "Darrel A Sauceda Jr",
+          "Letcia \"Letty\" Cisneros"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 13,
+    "name": "Pomona",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Jacky Elizalde",
+          "Victor Preciado"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 14,
+    "name": "Temecula",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Matt Rahn"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Brenden Kalfus"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "Yuan Hawkes",
+          "Russell Shirley",
+          "Zak Schwank",
+          "Laurel LaMont"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 15,
+    "name": "Murrieta",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Jon Levell"
+        ]
+      },
+      {
+        "title": "District 2",
+        "candidates": [
+          "Joshua Barton",
+          "Ron Holliday",
+          "Keelan McCullough"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "Luiz Valdez Jr",
+          "Cindy Warren"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 16,
+    "name": "Chino",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Curtis Burton",
+          "Jimmy D Alexandris"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "M S Alam",
+          "Marc Lucio"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 17,
+    "name": "Montclair",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Javier \"John\" Dutrey"
+        ]
+      },
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "Victor Mendez",
+          "Alice Garcia",
+          "Bill Ruh",
+          "Corysa Martinez"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 18,
+    "name": "Redlands",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Denise Davis",
+          "Doug Gonzales",
+          "Andrew Hoder"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Mario Saucedo"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "Paul Barich"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 19,
+    "name": "Palm Springs",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Grace Garner",
+          "Donald J Soja"
+        ]
+      },
+      {
+        "title": "District 2",
+        "candidates": [
+          "Jeffrey Bernstein",
+          "Tad Iwan"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Ron deHarte",
+          "Charles A Brown"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 20,
+    "name": "Menifee",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Ben Diederich",
+          "Laz Peterson",
+          "Thomas Fuhrman"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Frank Sandoval",
+          "Randy Madrid",
+          "Daniel Stephens"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 21,
+    "name": "Apple Valley",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Scott Nassif",
+          "David Dencker",
+          "Robert Andrew Lucero"
+        ]
+      },
+      {
+        "title": "Dictrict 3",
+        "candidates": [
+          "Kari Lynn Leon",
+          "Ted Bohanon"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Curt Emick",
+          "Matthew Rutledge"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 22,
+    "name": "Colton",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "John R Echivarria",
+          "Frank J Navarro"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Luis S Gonzalez",
+          "Eugene Valdez"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Joseph Paulino",
+          "Adrianna Escarcega",
+          "Lawrence \"Larry\" Rivas"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 23,
+    "name": "Upland",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "James Breitling"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Carlos A Garcia"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Rudy Zuniga"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 24,
+    "name": "Chino Hills",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Ray Marquez"
+        ]
+      },
+      {
+        "title": "District 2",
+        "candidates": [
+          "Peter Rogers",
+          "Shanita Ayala"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Josue Estrada",
+          "Brian Johsz"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 25,
+    "name": "Gran Terrace",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "William \"Bill\" Hussey"
+        ]
+      },
+      {
+        "title": "City Council",
+        "candidates": [
+          "Doug Wilson",
+          "Jeremy Cecil Briggs"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 26,
+    "name": "Lake Elsinore",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Brian Tisdale",
+          "Adela Gonzales"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Timothy J Sheridan"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Michael Carroll",
+          "Adelina Vega- Velasquez"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 27,
+    "name": "Banning",
+    "seats": [
+      {
+        "title": "District 4",
+        "candidates": [
+          "Nathaniel Rodriguez",
+          "Richard Royce",
+          "Marco Santana"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "Chris Castorena",
+          "Christian Villagran",
+          "Colleen Wallace"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 28,
+    "name": "Eastvale",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Todd Rigby",
+          "Dowa Ross",
+          "Rana Saba-Hekman"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Clint Lorimore"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Raul Gutierrez",
+          "Anu Saini",
+          "Sarah Oswald"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 29,
+    "name": "Highland",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Jimmy Saldana"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Jason Isaacs",
+          "Christy Marin"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 30,
+    "name": "Adelanto",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Gabriel Reyes",
+          "Ronald Beard",
+          "Stevevonna Evans"
+        ]
+      },
+      {
+        "title": "City Council (top two)",
+        "candidates": [
+          "Amanda Uptergrove",
+          "angelo meza",
+          "Jaushawn Johnson"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 31,
+    "name": "Norco",
+    "seats": [
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "Kevin Bash",
+          "Greg Newton"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 32,
+    "name": "Rancho Mirage",
+    "seats": [
+      {
+        "title": "Councilmember (Top Three)",
+        "candidates": [
+          "Steve Downs",
+          "Eve Formberg Edelstein",
+          "Lynn Mallotto"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 33,
+    "name": "Perris",
+    "seats": []
+  },
+  {
+    "rank": 34,
+    "name": "Hemet",
+    "seats": []
+  },
+  {
+    "rank": 35,
+    "name": "Yucaipa",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Greg Franklin",
+          "Chelsea Brammer Ramirez"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 36,
+    "name": "Barstow",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Sonia Compton Reay"
+        ]
+      },
+      {
+        "title": "District 2",
+        "candidates": [
+          "James Noble"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "Rick Denison",
+          "Dion Antic"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 37,
+    "name": "Yucca Valley",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Jim Schooler"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Merl R Abel"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 38,
+    "name": "Desert Hot Springs",
+    "seats": [
+      {
+        "title": "District 1",
+        "candidates": [
+          "Edouard Boumendil",
+          "Gary Gardner"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Joseph Erndt",
+          "Jan Pye"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 39,
+    "name": "Twentynine Palms",
+    "seats": [
+      {
+        "title": "District 3",
+        "candidates": [
+          "Daniel L Mintz Sr"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Octavious Scott",
+          "Carlos Blandon",
+          "Karmolette O'Gilvie"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "McArthur Wright",
+          "Shanese Risper"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 40,
+    "name": "La Quinta",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Linda Evans",
+          "Suzanne Espinoza-Jimenez",
+          "Lynne Langdon"
+        ]
+      },
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "John Pena",
+          "Deborah McGarrey",
+          "Carene Hensley",
+          "Julian Herrera"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 41,
+    "name": "Indio",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Gloria Hernandez",
+          "Waymond Fermon"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Elaine Holmes",
+          "Andrea Dolan Bouchard"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Felipe Ortiz",
+          "Jonathan Becerra"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 42,
+    "name": "Coachella",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Denise Delgado",
+          "Jesus \"Kino\" Gonzalez",
+          "Frank Figueroa",
+          "Francisco \"Frankie\" Molina"
+        ]
+      },
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "Yavonne Zapata",
+          "Vicente Zamora",
+          "Ambar De La Herran",
+          "Andrew Gallegos",
+          "Juan M Martinez"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 43,
+    "name": "Palm Desert",
+    "seats": [
+      {
+        "title": "District 4",
+        "candidates": [
+          "Jonathon Polly",
+          "Evan Trubee"
+        ]
+      },
+      {
+        "title": "District 5",
+        "candidates": [
+          "John Greenwood",
+          "Ralph Perry"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 44,
+    "name": "San Jacinto",
+    "seats": [
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "Susan Acevedo",
+          "Brian Hawkins"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 45,
+    "name": "Cathedral City",
+    "seats": [
+      {
+        "title": "District 3",
+        "candidates": [
+          "Alberto Ruiz",
+          "Christina Gordon"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Ernesto Gutierrez",
+          "David Koslow",
+          "Rick Saldivar"
+        ]
+      },
+      {
+        "title": "Distrcit 5",
+        "candidates": [
+          "Antonio Baciu",
+          "Danielle Mead"
+        ]
+      },
+      {
+        "title": "Treasurer",
+        "candidates": [
+          "Greg Jackson",
+          "Shelley Kaplan"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 46,
+    "name": "Blythe",
+    "seats": [
+      {
+        "title": "Councilmember (Top Three)",
+        "candidates": [
+          "Joseph Halby III",
+          "Alfonso Sonny Hernandez",
+          "Jayson D Lusk",
+          "Joseph \"Joey\" DeConinck",
+          "Johnny Z Rodriguez",
+          "Trevor Farrage"
+        ]
+      },
+      {
+        "title": "Clerk",
+        "candidates": [
+          "Mallory Crecelius"
+        ]
+      },
+      {
+        "title": "Tresurer",
+        "candidates": [
+          "Christa Elms"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 47,
+    "name": "Calimesa",
+    "seats": [
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "Jeff Cervantez",
+          "John Manly"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 48,
+    "name": "Loma Linda",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Phill Dupper"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Ron Dailey",
+          "Jonathan Hartnell",
+          "Amy Jones"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 49,
+    "name": "Canyon Lake",
+    "seats": [
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "Paul Kakis",
+          "Monica Lyons",
+          "Jeremy Smith"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 50,
+    "name": "Big Bear Lake",
+    "seats": [
+      {
+        "title": "District 2",
+        "candidates": [
+          "Sonia Ibarra",
+          "Kara Flietstra"
+        ]
+      },
+      {
+        "title": "District 3",
+        "candidates": [
+          "Ernie Mendoza",
+          "Michael Beveridge"
+        ]
+      },
+      {
+        "title": "District 4",
+        "candidates": [
+          "Suzy Gilleon",
+          "Cody Lewis"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 51,
+    "name": "Needles",
+    "seats": [
+      {
+        "title": "Mayor",
+        "candidates": [
+          "Jeff Williams",
+          "Janet Jernigan"
+        ]
+      },
+      {
+        "title": "City Council (Top Three)",
+        "candidates": [
+          "Sandra Queen Noble",
+          "Charles Dressler",
+          "Henry Longbrake",
+          "Wayne Colburn",
+          "Jamie McCordkle"
+        ]
+      }
+    ]
+  },
+  {
+    "rank": 52,
+    "name": "Indian Wells",
+    "seats": [
+      {
+        "title": "Councilmember (Top Two)",
+        "candidates": [
+          "Michael Hazelton",
+          "Karlyn Neel",
+          "Rob Zwemmer"
+        ]
+      }
+    ]
+  }
+];
+
+        let totalSeats = 0;
+        let totalCandidates = 0;
+        electionData.forEach(city => {
+            city.seats.forEach(seat => {
+                totalSeats++;
+                totalCandidates += seat.candidates.length;
+            });
+        });
+        document.getElementById('seatCount').textContent = totalSeats;
+        document.getElementById('candidateCount').textContent = totalCandidates;
+
+        const cityList = document.getElementById('cityList');
+        const searchInput = document.getElementById('searchInput');
+        const noResults = document.getElementById('noResults');
+
+        function getVoteNote(seatTitle) {
+            const lower = seatTitle.toLowerCase();
+            if (lower.includes('top two')) return 'Vote for up to 2';
+            if (lower.includes('top three')) return 'Vote for up to 3';
+            return null;
+        }
+
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\]/g, '\$&');
+        }
+
+        function renderCities(cities, highlightTerm) {
+            highlightTerm = highlightTerm || '';
+            cityList.innerHTML = '';
+
+            if (cities.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            }
+            noResults.style.display = 'none';
+
+            cities.forEach(city => {
+                const card = document.createElement('div');
+                card.className = 'city-card';
+
+                const seatLabel = city.seats.length === 1 ? '1 seat' : city.seats.length + ' seats';
+                const candidateTotal = city.seats.reduce((sum, s) => sum + s.candidates.length, 0);
+
+                let cityNameHtml = city.name;
+                if (highlightTerm) {
+                    const regex = new RegExp('(' + escapeRegex(highlightTerm) + ')', 'gi');
+                    cityNameHtml = city.name.replace(regex, '<span class="highlight">$1</span>');
+                }
+
+                let seatsHtml = '';
+                city.seats.forEach(seat => {
+                    const voteNote = getVoteNote(seat.title);
+                    let candidatesHtml = '';
+                    seat.candidates.forEach(c => {
+                        candidatesHtml += '<span class="candidate-tag">' + c + '</span>';
+                    });
+                    seatsHtml += '<div class="seat-section">' +
+                        '<div class="seat-title">' + seat.title +
+                        (voteNote ? '<span class="vote-note">' + voteNote + '</span>' : '') +
+                        '</div>' +
+                        '<div class="candidates-list">' + candidatesHtml + '</div>' +
+                        '</div>';
+                });
+
+                card.innerHTML = '<div class="city-header" onclick="toggleCity(this)">' +
+                    '<div class="city-name">' +
+                    '<span class="city-rank">' + city.rank + '</span>' +
+                    '<span>' + cityNameHtml + '</span>' +
+                    '</div>' +
+                    '<div style="display: flex; align-items: center; gap: 0.75rem;">' +
+                    '<span class="seat-count">' + seatLabel + ' &middot; ' + candidateTotal + ' candidate' + (candidateTotal !== 1 ? 's' : '') + '</span>' +
+                    '<svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />' +
+                    '</svg>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="city-body">' + seatsHtml + '</div>';
+
+                cityList.appendChild(card);
+            });
+
+            document.getElementById('cityCount').textContent = cities.length;
+        }
+
+        function toggleCity(header) {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            const isOpen = body.classList.contains('open');
+
+            if (isOpen) {
+                body.classList.remove('open');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+            } else {
+                body.classList.add('open');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+            }
+        }
+
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.trim().toLowerCase();
+            if (!term) {
+                renderCities(electionData);
+                return;
+            }
+
+            const filtered = electionData.filter(city => 
+                city.name.toLowerCase().includes(term)
+            );
+            renderCities(filtered, term);
+        });
+
+        renderCities(electionData);
+    </script>
+</body>
+</html>
